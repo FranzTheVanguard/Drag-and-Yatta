@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId "com.example.yatta2048"
         minSdk 24
-        targetSdk 32
+        targetSdk 30
         versionCode 1
         versionName "1.0"
 
@@ -18,8 +18,23 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        applicationVariants.all {
+                // this method is use to rename your all apk weather
+                // it may be signed or unsigned(debug apk)
+            variant ->
+                variant.outputs.each {
+                        // on below line we are setting a
+                        // name to our apk as GFG.apk
+                    output ->
+                        def name = "Yatta.apk"
+                        // on below line we are setting the
+                        // outputFile Name to our apk file.
+                        output.outputFileName = name
+                }
         }
     }
     compileOptions {
