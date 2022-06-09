@@ -6,37 +6,50 @@ import android.content.ClipDescription
 import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.DragEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
-
+import com.example.yatta2048.databinding.ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity() {
-    lateinit var mainLayout : ConstraintLayout
-    lateinit var box1 : FrameLayout ; lateinit var box2 : FrameLayout ; lateinit var box3 : FrameLayout
-    lateinit var box4 : FrameLayout ; lateinit var box5 : FrameLayout ; lateinit var box6 : FrameLayout
-    lateinit var box7 : FrameLayout ; lateinit var box8 : FrameLayout ; lateinit var box9 : FrameLayout
-    val names = arrayOf("kiana", "mei", "senti")
-    lateinit var mediaPlayer : MediaPlayer
-    var sentiScore : Int = 0
-    lateinit var scoreText : TextView
+    private lateinit var mainLayout : ConstraintLayout
+    private lateinit var
+            box1 : FrameLayout ; private lateinit var box2 : FrameLayout ; private lateinit var box3 : FrameLayout
+    private lateinit var box4 : FrameLayout ; private lateinit var box5 : FrameLayout ; private lateinit var box6 : FrameLayout
+    private lateinit var box7 : FrameLayout ; private lateinit var box8 : FrameLayout ; private lateinit var box9 : FrameLayout
+    private lateinit var spawnButton : Button
+    private val names = arrayOf("kiana", "mei", "senti")
+    private lateinit var mediaPlayer : MediaPlayer
+    private var sentiScore : Int = 0
+    private lateinit var scoreText : TextView
+    private var _binding : ActivityMainBinding? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        initAssign()
+
+
+    }
+
+    private fun initAssign() {
+        _binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(_binding!!.root)
         mediaPlayer = MediaPlayer.create(this, R.raw.yatta_sfx)
-        mainLayout = findViewById(R.id.mainlayout)
-        box1 = findViewById(R.id.box1); box2 = findViewById(R.id.box2); box3 = findViewById(R.id.box3)
-        box4 = findViewById(R.id.box4); box5 = findViewById(R.id.box5); box6 = findViewById(R.id.box6)
-        box7 = findViewById(R.id.box7); box8 = findViewById(R.id.box8); box9 = findViewById(R.id.box9)
-        var spawnButton: Button = findViewById(R.id.spawnbutton)
-        spawnButton.setOnClickListener { v: View ->
+        mainLayout = _binding!!.mainlayout
+        box1 = _binding!!.box1; box2 = _binding!!.box2; box3 = _binding!!.box3
+        box4 = _binding!!.box4; box5 = _binding!!.box5; box6 = _binding!!.box6
+        box7 = _binding!!.box7; box8 = _binding!!.box8; box9 = _binding!!.box9
+        spawnButton = _binding!!.spawnbutton
+        assignOnClick()
+        scoreText = _binding!!.sentiScore
+    }
+
+    private fun assignOnClick() {
+        spawnButton.setOnClickListener {
             createBlock()
         }
-        scoreText = findViewById(R.id.senti_score)
     }
 
     private val dragListen = View.OnDragListener { v, event ->
@@ -66,10 +79,10 @@ class MainActivity : AppCompatActivity() {
                 v.invalidate()
                 val item: ClipData.Item = event.clipData.getItemAt(0)
                 val dragData = item.text
-                var viewfinder = event.localState as ImageView
+                val viewfinder = event.localState as ImageView
                 if(dragData.equals(receiverView.tag)&&viewfinder.parent!=receiverView.parent){
                     mediaPlayer.start()
-                    var parentview : FrameLayout = viewfinder.parent as FrameLayout
+                    val parentview : FrameLayout = viewfinder.parent as FrameLayout
                     parentview.removeAllViews()
                     when(receiverView.tag){
                         "kiana" ->{
@@ -82,7 +95,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         "senti"->{
                             sentiScore += 1
-                            scoreText.setText(" : $sentiScore")
+                            scoreText.text = " : $sentiScore"
                             val tempView : FrameLayout = receiverView.parent as FrameLayout
                             tempView.removeAllViews()
                         }
@@ -115,7 +128,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createBlock(){
-        var block : ImageView = ImageView(this)
+        var block = ImageView(this)
         block.tag = names[0]
         block.setOnLongClickListener { v:View ->
             val item = ClipData.Item(block.tag as? String)
@@ -134,12 +147,12 @@ class MainActivity : AppCompatActivity() {
         val pixels = this.resources.displayMetrics.density * 80
         block.layoutParams = ViewGroup.LayoutParams(pixels.toInt(),pixels.toInt())
         block.setImageResource(R.drawable.yatta_kiana)
-        var yatta_position : Int = 0
+        var yattaPosition = 0
         if(!isFull()){
-            while(getBox(yatta_position).childCount>0){
-                yatta_position = (0..8).random()+1
+            while(getBox(yattaPosition).childCount>0){
+                yattaPosition = (0..8).random()+1
             }
-            getBox(yatta_position).addView(block)
+            getBox(yattaPosition).addView(block)
         }
         else Toast.makeText(this, "Full!", Toast.LENGTH_SHORT).show()
     }
@@ -162,5 +175,10 @@ class MainActivity : AppCompatActivity() {
     private fun isFull() : Boolean{
         var totalFilled : Int = box1.childCount+box2.childCount+box3.childCount+box4.childCount+box5.childCount+box6.childCount+box7.childCount+box8.childCount+box9.childCount
         return totalFilled>=9
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 }
